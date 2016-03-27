@@ -1,0 +1,103 @@
+// O objetivo é exemplificar a aplicação dos métodos do JavaSwing
+// em uma calculadora.
+// Operações de adição e subtração apenas.
+// Nesse exemplo também não foram tratadas as exceções.
+import java.io.*;
+import javax.swing.*;
+import java.awt.event.*;
+public class Calculadora extends JFrame{
+	private JButton somar;
+    private JButton igual;
+    private JButton clear;
+    private JButton subtrair;
+    private JTextField display;
+    private float leitura;
+    private float memoria;
+    private char operacao;	   
+    char toDo;
+    int value;
+    public Calculadora(){
+    this.setTitle("Calculadora");
+    this.setBounds(0, 0, 400, 400);
+    this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+    this.getContentPane().setLayout(null);
+    
+    somar = new JButton();
+    somar.setText("+");
+    somar.setBounds(120, 70, 45, 45);
+    this.add(somar);
+    
+    subtrair = new JButton();
+    subtrair.setText("-");
+    subtrair.setBounds(180, 70, 45, 45);
+    this.add(subtrair);
+    
+    igual = new JButton();
+    igual.setText("=");
+    igual.setBounds(25, 130, 200, 45);
+    this.add(igual);
+    
+    clear = new JButton();
+    clear.setText("clear");
+    clear.setBounds(30, 70, 78, 45);
+    this.add(clear);
+    
+    leitura = 0;
+    memoria = 0;
+    display = new JTextField();
+    display.setBounds(25, 25, 200, 30);
+    this.add(display);
+    
+    clear.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            leitura = 0;
+            memoria = 0;
+            display.setText("");
+        }
+    });
+    
+    somar.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            operacao = '+';
+            memoria = Float.parseFloat(display.getText());
+            display.setText("");
+        }
+    });
+    
+    subtrair.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            operacao = '-';
+            memoria = Float.parseFloat(display.getText());
+            display.setText("");
+        }
+    });
+    
+    igual.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            switch (operacao) {
+                case '+': {
+                	leitura = Float.parseFloat(display.getText());
+                    memoria += leitura;
+                    display.setText("" + memoria);
+                    break;
+                }
+                case '-': {
+                	leitura = Float.parseFloat(display.getText());
+                    memoria -= leitura;
+                    display.setText("" + memoria);
+                    break;
+                }
+            }
+            
+        }
+    });
+    
+    }
+
+	public static void main(String[] args) {
+		Calculadora c = new Calculadora();
+		c.setVisible(true);
+
+    }
+}
+
