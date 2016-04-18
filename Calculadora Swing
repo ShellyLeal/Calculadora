@@ -80,7 +80,7 @@ public class Calculator extends JFrame implements ActionListener,Runnable
     // inicializa p3 com os botões numéricos e operacionais
     p3=new JPanel();
     p3.setLayout(new GridLayout(4,5,5,5)); // definindo o numero de linhas e colunas
-    // adicionando os componentes na calculadora na ordem definida
+    // adicionando os componentes na calculadora na ordem definida 
     p3.add(bnum[1]);
     p3.add(bnum[2]);
     p3.add(bnum[3]);
