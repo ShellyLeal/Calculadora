@@ -1,89 +1,339 @@
-import java.io.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-class CalculatorEngine { // classe correspondente às operações da calculadora
-    char toDo;
-    int value;
-    int keep; // two calculator registers
-    void binaryOperation(char op){
-    keep = value; // manter o primeiro operando 
-    value = 0; // inicializa o segundo operando
-    toDo = op;
+public class Calculator extends JFrame implements ActionListener,Runnable
+{
+  JButton bnum[]; // botoes numericos
+  JButton bback,bce,bc; // botoes basicos (BACK, CE, C)
+  JButton bop[],jdb; // botoes operacionais
+  JLabel jl;
+  JTextField tf; // região de texto onde o usuário digita os números
+  JPanel p1,p2,p3; // divide em 3 regiões: área de texto, botões basicos, e numericos/operacionais
+  JDialog jd;
+  double d1,d2,d3;
+  boolean frac=false;
+  char op;
+  boolean opc=false,ope=false;
+  
+  public void run() // thread criada para o efeito de movimento do título 'Calculadora Swing'
+  {
+    while(true)
+    {
+      char ch=getTitle().charAt(0);
+      setTitle(getTitle().substring(1,getTitle().length())+Character.toString(ch));
+      try{
+       Thread.sleep(200);
+      }catch(InterruptedException ie){
+       System.out.println(ie);
+      }
     }
-    void add(){binaryOperation('+');}
-    void subtract(){binaryOperation('-');}
-    void multiply(){binaryOperation('*');}
-    void divide(){binaryOperation('/');}
-    void compute(){
-    if(toDo=='+')
-     value = keep+value;
-    else if(toDo=='-')
-     value = keep-value;
-    else if(toDo=='*')
-     value = keep*value;
-    else if(toDo == '/')
-     value = keep/value;
-    keep= 0;
-    }
-    void clear(){
-     keep = 0;
-     value = 0;
-    }
-    void digit(int x){
-     value = value*10 +x;    
-    }
-    int display(){
-     return value;
-    }
-    CalculatorEngine(){clear();}
+  }
+  public Calculator(String str) // classe principal
+  {
+    super(str);
+    bnum=new JButton[10];
+    jd=new JDialog(this,"Message",true);
+    jdb=new JButton("OK");
+    jl=new JLabel();
+    jd.setLayout(new FlowLayout());
+    jdb.setMargin(new Insets(2,5,2,5));
+    jd.add(jl); jd.add(jdb);
+    jdb.addActionListener(this);
+    for(int i=0;i<10;i++)
+      bnum[i]=new JButton(Integer.toString(i));
     
-}
+    //define os botões básicos
+    bback=new JButton("Back");
+    bce=new JButton("CE");
+    bc=new JButton("C");
+    
+    // inicializa p2 com os botões basicos
+    p2=new JPanel();
+    p2.setLayout(new FlowLayout());
+    p2.add(bback);
+    p2.add(bce);
+    p2.add(bc);
+    
+    // define a área de texto p1 para digitar
+    tf=new JTextField(15);
+    p1=new JPanel();
+    p1.add(tf);
+    tf.setEditable(false);
+    tf.setHorizontalAlignment(JTextField.RIGHT);
+    tf.setText("0.");
+    tf.setBackground(Color.white);
+    tf.setFont(new Font("Dialog",Font.BOLD,12));
+    
+    //define os botões operacionais
+    bop=new JButton[10];
+    bop[0]=new JButton("+");
+    bop[1]=new JButton("-");
+    bop[2]=new JButton("*");
+    bop[3]=new JButton("/");
+    bop[4]=new JButton(".");
+    bop[5]=new JButton("=");
 
-class CalculatorInput{ // classe para criar a interface simples
-	BufferedReader stream;
-	CalculatorEngine engine;
-
-	
-	CalculatorInput(CalculatorEngine e){
-		InputStreamReader input = new InputStreamReader(System.in);
-		stream = new BufferedReader(input);
-		engine = e;
-	}
-	
-	void run() throws Exception {
-		for(;;) {
-			System.out.print("["+engine.display()+"]"); // display personalizado
-			String m = stream.readLine();
-			if(m == null) break;
-			if(m.length()>0){
-				char c = m.charAt(0);
-				if(c == '+') engine.add();
-				else if(c=='-') engine.subtract();
-				else if(c=='*') engine.multiply();
-				else if(c=='/') engine.divide();
-				else if(c>='0'&&c<='9') engine.digit(c-'0');
-				else if(c=='=') engine.compute();
-				else if(c=='c'||c=='C')engine.clear();		
-				
-			}
-		}
-	}
-}
-
-public class Calculadora {
-	public static void main(String[] args) {
-		CalculatorEngine c = new CalculatorEngine();
-		CalculatorInput ci = new CalculatorInput(c);
-		
-		try{
-			ci.run();
-		} catch(Exception ex){}
-		
-        /*c.digit(1);
-        c.digit(3);
-        c.add();
-        c.digit(1);
-        c.digit(1);
-        c.compute();*/
-        System.out.println(c.display());
+    bop[6]=new JButton("Sqrt");
+    bop[7]=new JButton("1/x");
+    bop[8]=new JButton("+/-");
+    for(int i=0;i<9;i++){
+      bop[i].setMargin(new Insets(2,2,2,2));
+      bop[i].addActionListener(this);
     }
+    // inicializa p3 com os botões numéricos e operacionais
+    p3=new JPanel();
+    p3.setLayout(new GridLayout(4,5,5,5)); // definindo o numero de linhas e colunas
+    
+    // adicionando os componentes na calculadora na ordem definida
+    p3.add(bnum[1]);
+    p3.add(bnum[2]);
+    p3.add(bnum[3]);
+    p3.add(bop[0]);
+    p3.add(bop[6]);
+    p3.add(bnum[4]);
+    p3.add(bnum[5]);
+    p3.add(bnum[6]);
+    p3.add(bop[1]);
+    p3.add(bop[7]);
+    p3.add(bnum[7]);
+    p3.add(bnum[8]);
+    p3.add(bnum[9]);
+    p3.add(bop[2]);
+
+    p3.add(bnum[0]);
+    p3.add(bop[8]);
+    p3.add(bop[4]);
+    p3.add(bop[3]);
+    p3.add(bop[5]);
+    
+    // incluindo as regiões p1, p2 e p3 na área principal
+    Container c=getContentPane();
+    c.setLayout(new FlowLayout());
+    c.add(p1);
+    c.add(p2);
+    c.add(p3);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setResizable(false);
+    // definindo fonte e margem para os botões operacionais e numéricos
+    // incluindo ActionListener para detectar o clique do usuário em cada respectivo botão
+    for(int i=0;i<=6;i++)
+      bop[i].setFont(new Font("Dialog",Font.BOLD,13));
+    for(int i=0;i<10;i++){
+      bnum[i].addActionListener(this);
+      bnum[i].setMargin(new Insets(2,10,2,10));
+    }
+    bce.addActionListener(this);
+    bc.addActionListener(this);
+    bback.addActionListener(this);
+  }
+  public void actionPerformed(ActionEvent ae) // detectado o clique, o evento é iniciado
+  {
+    String s=tf.getText();
+    String str;
+    if(!frac)
+      str=s.substring(0,s.length()-1);
+    else
+      str=s;
+    if(ae.getSource()==bback) // botão BACK
+    {
+      if(frac){
+       if(str.charAt(str.length()-1)=='.')
+        frac=false;
+       else tf.setText(str.substring(0,str.length()-1));
+      }
+      else{
+      if(!str.equals("0"))
+       tf.setText(str.substring(0,str.length()-1)+".");
+      }
+      if(tf.getText().equals("."))
+       tf.setText("0.");
+    }
+    else if(ae.getSource()==bce) // botão CE
+    {
+      tf.setText("0.");
+      frac=false;
+      opc=false;
+    }
+    else if(ae.getSource()==bc) // botão C
+    {
+      tf.setText("0.");
+      d1=0;
+      d2=0;
+      frac=false;
+      opc=false;
+      ope=false;
+    }
+    // próximos else if: botões operacionais
+    else if(ae.getSource()==bop[0]) 
+    {
+      if(ope){
+       d2=Double.parseDouble(str);
+       d3=calc(d1,d2,op);
+       String dn=Double.toString(d3);
+       if(dn.charAt(dn.length()-1)=='0')
+        dn=dn.substring(0,dn.length()-1);
+       tf.setText(dn);
+       ope=false;
+       str=dn;
+      }
+      d1=Double.parseDouble(str);
+      opc=true;
+      op='+';
+    }
+    else if(ae.getSource()==bop[1])
+    {
+      if(ope){
+       d2=Double.parseDouble(str);
+       d3=calc(d1,d2,op);
+       String dn=Double.toString(d3);
+       if(dn.charAt(dn.length()-1)=='0')
+        dn=dn.substring(0,dn.length()-1);
+       tf.setText(dn);
+       ope=false;
+       str=dn;
+      }
+      d1=Double.parseDouble(str);
+      opc=true;
+      op='-';
+    }
+    else if(ae.getSource()==bop[2])
+    {
+      if(ope){
+       d2=Double.parseDouble(str);
+       d3=calc(d1,d2,op);
+       String dn=Double.toString(d3);
+       if(dn.charAt(dn.length()-1)=='0')
+        dn=dn.substring(0,dn.length()-1);
+       tf.setText(dn);
+       ope=false;
+       str=dn;
+      }
+      d1=Double.parseDouble(str);
+      opc=true;
+      op='*';
+    }
+    else if(ae.getSource()==bop[3])
+    {
+      if(ope){
+       d2=Double.parseDouble(str);
+       d3=calc(d1,d2,op);
+       String dn=Double.toString(d3);
+       if(dn.charAt(dn.length()-1)=='0')
+        dn=dn.substring(0,dn.length()-1);
+       tf.setText(dn);
+       ope=false;
+       str=dn;
+      }
+      d1=Double.parseDouble(str);
+      opc=true;
+      op='/';
+    }
+    else if(ae.getSource()==bop[4])
+    {
+      frac=true;
+    }
+    else if(ae.getSource()==bop[5])
+    {
+      if(ope)
+      {
+       d2=Double.parseDouble(str);
+       d3=calc(d1,d2,op);
+       String dn=Double.toString(d3);
+       if(dn.charAt(dn.length()-1)=='0')
+        dn=dn.substring(0,dn.length()-1);
+       tf.setText(dn);
+       d1=d3;
+       opc=false;
+       ope=false;
+      }
+    }
+
+    else if(ae.getSource()==bop[6])
+    {
+      double temp=Double.parseDouble(tf.getText());
+      String tmp=Double.toString(Math.sqrt(temp));
+      if(tmp.charAt(tmp.length()-1)=='0')
+       tmp=tmp.substring(0,tmp.length()-1);
+      tf.setText(tmp);
+    }
+    else if(ae.getSource()==bop[7])
+    {
+      double temp=Double.parseDouble(tf.getText());
+      String tmp=Double.toString(1/temp);
+      if(tmp.equals("Infinity")){
+       jl.setText("Cannot divided by zero");
+       jd.setSize(150,90);
+       jd.setResizable(false);
+       jd.setVisible(true);
+      }
+      else{
+      if(tmp.charAt(tmp.length()-1)=='0')
+       tmp=tmp.substring(0,tmp.length()-1);
+      tf.setText(tmp);
+      }
+    }
+    else if(ae.getSource()==bop[8])
+    {
+      double temp=Double.parseDouble(tf.getText());
+      if(temp!=0){
+      String tmp=Double.toString(-1*temp);
+      if(tmp.charAt(tmp.length()-1)=='0')
+       tmp=tmp.substring(0,tmp.length()-1);
+      tf.setText(tmp);
+      }else tf.setText("0.");
+    }
+    else if(ae.getSource()==jdb)
+    {
+      jd.setVisible(false);
+    }
+    else
+    {
+      if(opc){
+       tf.setText("0.");
+       frac=false;
+       str="0";
+       ope=true;
+       opc=false;
+      }
+      if(frac)
+       tf.setText(str+ae.getActionCommand());
+      else{
+      if(str.equals("0")){
+       tf.setText("");
+       tf.setText(ae.getActionCommand()+".");
+      }
+      else
+       tf.setText(str+ae.getActionCommand()+".");
+      }
+    }
+  }
+  public double calc(double a,double b,char ch)
+  {
+    double c=0;
+    switch(ch)
+    {
+      case '+':
+       c=a+b;
+       break;
+      case '-':
+       c=a-b;
+       break;
+      case '*':
+       c=a*b;
+       break;
+      case '/':
+       c=a/b;
+       break;
+    }
+    return c;
+  }
+  public static void main(String[] args) // inicia a main
+  {
+    Calculator c=new Calculator("Calculadora Swing      ");
+    c.setSize(210,250);
+    c.setVisible(true);
+    Thread t=new Thread(c);
+    t.start();
+  }
 }
